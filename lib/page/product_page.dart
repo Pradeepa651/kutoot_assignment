@@ -186,7 +186,7 @@ class ProductView extends StatelessWidget {
           ),
           ListTile(
             title: Text(product.title),
-            subtitle: Text('\$${product.description}'),
+            subtitle: Text(product.description),
           ),
           Padding(
             padding: const EdgeInsets.all(4.0).copyWith(left: 16),
