@@ -11,26 +11,24 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(title: const Text('Home')),
       body: Column(
         children: [
-          RepaintBoundary(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Colors.white, Colors.white70, Colors.black12],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-
-                borderRadius: BorderRadius.circular(8),
-              ),
-
-              child: ListTile(
-                title: const Text('Products'),
-                subtitle: const Text('View our product catalog'),
-                leading: const Icon(Icons.shopping_bag),
-                onTap: () {
-                  context.push(AppRoutes.products);
-                },
-              ),
+          Card(
+            child: ListTile(
+              title: const Text('Products'),
+              subtitle: const Text('View our product catalog'),
+              leading: const Icon(Icons.shopping_bag),
+              onTap: () {
+                context.push(AppRoutes.products);
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('Tasks'),
+              subtitle: const Text('View your tasks'),
+              leading: const Icon(Icons.list),
+              onTap: () {
+                context.push(AppRoutes.tasks);
+              },
             ),
           ),
         ],

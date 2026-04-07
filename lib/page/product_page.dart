@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_developer_assignment_task/bloc/cubit/fast_srcolling_cubit.dart';
+import 'package:flutter_developer_assignment_task/bloc/cubit/fast_scrolling_cubit.dart';
 import 'package:flutter_developer_assignment_task/bloc/product_bloc/product_bloc.dart';
 
 import '../model/products.dart' show Product, Review;
@@ -18,7 +18,7 @@ class ProductPage extends StatelessWidget {
               ProductBloc(productRepository: context.read<ProductRepository>())
                 ..add(ProductFetched()),
         ),
-        BlocProvider(create: (context) => FastSrcollingCubit()),
+        BlocProvider(create: (context) => FastScrollingCubit()),
       ],
       child: Scaffold(
         appBar: AppBar(title: const Text('Products')),
@@ -32,7 +32,7 @@ class ProductPage extends StatelessWidget {
 class ProductListView extends StatelessWidget {
   const ProductListView({super.key});
 
-  void _fechNextProducts(BuildContext context) {
+  void _fetchNextProducts(BuildContext context) {
     if (context.read<ProductBloc>().state.apiStatus != ApiStatus.loading &&
         !context.read<ProductBloc>().state.hasMaxReached) {
       context.read<ProductBloc>().add(ProductFetched());
@@ -57,9 +57,9 @@ class ProductListView extends StatelessWidget {
           onNotification: (scrollInfo) {
             if (scrollInfo.metrics.pixels >=
                 scrollInfo.metrics.maxScrollExtent - 200) {
-              _fechNextProducts(context);
+              _fetchNextProducts(context);
             }
-            context.read<FastSrcollingCubit>().updateScrollState(
+            context.read<FastScrollingCubit>().updateScrollState(
               isFastScroll(scrollInfo),
             );
             return false;
@@ -166,15 +166,15 @@ class ProductView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BlocBuilder<FastSrcollingCubit, bool>(
+          BlocBuilder<FastScrollingCubit, bool>(
             builder: (context, isFastScrolling) {
               return isFastScrolling
-                  ? ImagrSkeleton()
+                  ? ImageSkeleton()
                   : Image.network(
                       product.thumbnail,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
-                        return const ImagrSkeleton();
+                        return const ImageSkeleton();
                       },
                       width: double.infinity,
                       height: 200,
@@ -234,8 +234,8 @@ class ReviewListView extends StatelessWidget {
   }
 }
 
-class ImagrSkeleton extends StatelessWidget {
-  const ImagrSkeleton({super.key});
+class ImageSkeleton extends StatelessWidget {
+  const ImageSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {

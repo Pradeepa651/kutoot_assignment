@@ -3,6 +3,7 @@ import 'package:flutter_developer_assignment_task/routes/app_routes.dart'
 import 'package:go_router/go_router.dart';
 import '../page/home_page.dart' show HomePage;
 import '../page/product_page.dart' show ProductPage;
+import '../page/task_page.dart' show TaskPage;
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -14,6 +15,10 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.products,
             builder: (context, state) => const ProductPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.tasks,
+            builder: (context, state) => const TaskPage(),
           ),
         ],
       ),
