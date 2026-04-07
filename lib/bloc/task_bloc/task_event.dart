@@ -11,10 +11,29 @@ final class TaskLoaded extends TaskEvent {
   const TaskLoaded();
 }
 
-final class TaskAdd extends TaskEvent {
-  const TaskAdd();
+final class TaskAdded extends TaskEvent {
+  final String title;
+  final String description;
+  const TaskAdded({required this.title, required this.description});
+
+  @override
+  List<Object> get props => [title, description];
 }
 
-final class TaskEdit extends TaskEvent {
-  const TaskEdit();
+final class TaskEdited extends TaskEvent {
+  final String id;
+  final String title;
+  final String description;
+  const TaskEdited({
+    required this.id,
+    required this.title,
+    required this.description,
+  });
+
+  @override
+  List<Object> get props => [id, title, description];
+}
+
+final class TaskSyncRequested extends TaskEvent {
+  const TaskSyncRequested();
 }
