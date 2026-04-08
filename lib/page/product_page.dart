@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_developer_assignment_task/bloc/cubit/fast_scrolling_cubit.dart';
+import 'package:flutter_developer_assignment_task/bloc/internet_connection_cubit/internet_connection_cubit.dart';
 import 'package:flutter_developer_assignment_task/bloc/product_bloc/product_bloc.dart';
 
 import '../model/products.dart' show Product, Review;
@@ -66,6 +67,34 @@ class ProductListView extends StatelessWidget {
           },
           child: CustomScrollView(
             slivers: [
+              BlocConsumer<InternetConnectionCubit, InternetConnectionState>(
+                listener: (context, state) {
+                  if (state is InternetConnectionConnected) {
+                    context.read<ProductBloc>().add(ProductRefreshed());
+                  }
+                },
+                builder: (context, state) {
+                  if (state is InternetConnectionDisconnected) {
+                    return const PinnedHeaderSliver(
+                      child: ColoredBox(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.warning, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('You are offline'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return SliverToBoxAdapter();
+                },
+              ),
               BlocBuilder<ProductBloc, ProductState>(
                 builder: (context, state) {
                   if (state.apiStatus == ApiStatus.loading &&
@@ -176,7 +205,10 @@ class ProductView extends StatelessWidget {
                         if (loadingProgress == null) return child;
                         return const ImageSkeleton();
                       },
+                      errorBuilder: (context, error, stackTrace) =>
+                          const ImageSkeleton(),
                       width: double.infinity,
+
                       height: 200,
                       fit: BoxFit.fitHeight,
                     );

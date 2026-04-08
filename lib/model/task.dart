@@ -2,7 +2,9 @@ import 'dart:convert';
 
 class Task {
   final String id;
+
   final String title;
+
   final String description;
 
   Task({required this.id, required this.title, required this.description});
@@ -35,4 +37,25 @@ class Task {
 
   factory Task.fromJson(String source) =>
       Task.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+class TaskList {
+  final List<Task> tasks;
+
+  TaskList({required this.tasks});
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{'tasks': tasks.map((x) => x.toMap()).toList()};
+  }
+
+  factory TaskList.fromMap(Map<String, dynamic> map) {
+    return TaskList(
+      tasks: List<Task>.from(map['tasks']?.map((x) => Task.fromMap(x))),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory TaskList.fromJson(String source) =>
+      TaskList.fromMap(json.decode(source) as Map<String, dynamic>);
 }

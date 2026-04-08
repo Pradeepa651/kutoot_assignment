@@ -37,3 +37,11 @@ final class TaskEdited extends TaskEvent {
 final class TaskSyncRequested extends TaskEvent {
   const TaskSyncRequested();
 }
+
+final class _InternetStatusChanged extends TaskEvent {
+  final InternetStatus status;
+  const _InternetStatusChanged(this.status);
+
+  @override
+  List<Object> get props => [status];
+}
