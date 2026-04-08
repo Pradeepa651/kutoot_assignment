@@ -73,6 +73,75 @@ class TaskPage extends StatelessWidget {
   }
 }
 
+class TaskListView extends StatelessWidget {
+  const TaskListView({super.key});
+  void _showEditDialog(BuildContext context, Task task) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return BlocProvider.value(
+          value: context.read<TaskBloc>(),
+          child: Dialog(
+            insetPadding: EdgeInsets.all(4),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: EditTask(task: task),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        BlocBuilder<TaskBloc, TaskState>(
+          builder: (context, state) {
+            return switch (state.status) {
+              Status.initial ||
+              Status.loading ||
+              Status.refresh => SliverFillRemaining(
+                child: const Center(
+                  child: RepaintBoundary(child: CircularProgressIndicator()),
+                ),
+              ),
+              Status.success || Status.updated => SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final task = state.tasks[index];
+                  final isSynced = !state.unSyncedTasks.contains(task);
+                  return ListTile(
+                    title: Text(task.title),
+                    subtitle: Text(task.description),
+                    onTap: () {
+                      _showEditDialog(context, task);
+                    },
+                    trailing: isSynced
+                        ? const Icon(Icons.check, color: Colors.blue, size: 12)
+                        : const Icon(
+                            Icons.sync,
+                            color: Colors.orange,
+                            size: 12,
+                          ),
+                  );
+                }, childCount: state.tasks.length),
+              ),
+
+              Status.error => SliverFillRemaining(
+                child: Center(
+                  child: Text(state.errorMessage ?? 'An error occurred'),
+                ),
+              ),
+              _ => const SliverToBoxAdapter(),
+            };
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class EditTask extends StatefulWidget {
   const EditTask({super.key, required this.task});
   final Task task;
@@ -267,75 +336,6 @@ class _AddTaskState extends State<AddTask> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class TaskListView extends StatelessWidget {
-  const TaskListView({super.key});
-  void _showEditDialog(BuildContext context, Task task) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return BlocProvider.value(
-          value: context.read<TaskBloc>(),
-          child: Dialog(
-            insetPadding: EdgeInsets.all(4),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: EditTask(task: task),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        BlocBuilder<TaskBloc, TaskState>(
-          builder: (context, state) {
-            return switch (state.status) {
-              Status.initial ||
-              Status.loading ||
-              Status.refresh => SliverFillRemaining(
-                child: const Center(
-                  child: RepaintBoundary(child: CircularProgressIndicator()),
-                ),
-              ),
-              Status.success || Status.updated => SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final task = state.tasks[index];
-                  final isSynced = !state.unSyncedTasks.contains(task);
-                  return ListTile(
-                    title: Text(task.title),
-                    subtitle: Text(task.description),
-                    onTap: () {
-                      _showEditDialog(context, task);
-                    },
-                    trailing: isSynced
-                        ? const Icon(Icons.check, color: Colors.blue, size: 12)
-                        : const Icon(
-                            Icons.sync,
-                            color: Colors.orange,
-                            size: 12,
-                          ),
-                  );
-                }, childCount: state.tasks.length),
-              ),
-
-              Status.error => SliverFillRemaining(
-                child: Center(
-                  child: Text(state.errorMessage ?? 'An error occurred'),
-                ),
-              ),
-              _ => const SliverToBoxAdapter(),
-            };
-          },
-        ),
-      ],
     );
   }
 }
