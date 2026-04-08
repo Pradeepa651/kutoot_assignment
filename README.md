@@ -74,12 +74,6 @@ dart run build_runner build --delete-conflicting-outputs
 
 4. Restart the application when model classes change.
 
-## Best Practices
-
-- Always annotate Hive model classes with `@HiveType` and `@HiveField`.
-- Register all generated adapters before opening boxes.
-- Keep generated files under version control if they are required for build.
-
 ## Troubleshooting
 
 - `HiveError: Cannot write, unknown type: Task`
