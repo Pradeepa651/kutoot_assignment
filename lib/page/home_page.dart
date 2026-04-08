@@ -13,8 +13,8 @@ class HomePage extends StatelessWidget {
         children: [
           Card(
             child: ListTile(
-              title: const Text('Products'),
-              subtitle: const Text('View our product catalog'),
+              title: const Text('Task 1'),
+              subtitle: const Text('Performance Architect'),
               leading: const Icon(Icons.shopping_bag),
               onTap: () {
                 context.push(AppRoutes.products);
@@ -23,8 +23,8 @@ class HomePage extends StatelessWidget {
           ),
           Card(
             child: ListTile(
-              title: const Text('Tasks'),
-              subtitle: const Text('View your tasks'),
+              title: const Text('Task 2'),
+              subtitle: const Text('State Management & Sync'),
               leading: const Icon(Icons.list),
               onTap: () {
                 context.push(AppRoutes.tasks);
