@@ -22,8 +22,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     emit(state.copyWith(apiStatus: ApiStatus.loading));
     try {
-      if (state.hasMaxReached) {
-        emit(state.copyWith(apiStatus: ApiStatus.success));
+      if (state.hasMaxReached || state.apiStatus == ApiStatus.loading) {
         return;
       }
       final productData = await productRepository.fetchProducts(
