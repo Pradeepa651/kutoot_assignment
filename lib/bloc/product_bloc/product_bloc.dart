@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,19 +13,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepository productRepository;
   ProductBloc({required this.productRepository})
     : super(ProductState(skip: 0, apiStatus: ApiStatus.initial, products: [])) {
-    on<ProductFetched>(_onProductFetched);
-    on<ProductRefreshed>(_onProductRefreshed);
+    on<ProductFetched>(_onProductFetched, transformer: droppable());
+    on<ProductRefreshed>(_onProductRefreshed, transformer: droppable());
   }
 
   void _onProductFetched(
     ProductFetched event,
     Emitter<ProductState> emit,
   ) async {
-    emit(state.copyWith(apiStatus: ApiStatus.loading));
+    if (state.hasMaxReached) {
+      return;
+    }
     try {
-      if (state.hasMaxReached || state.apiStatus == ApiStatus.loading) {
-        return;
-      }
+      emit(state.copyWith(apiStatus: ApiStatus.loading));
       final productData = await productRepository.fetchProducts(
         limit: event.limit,
         skip: state.skip,

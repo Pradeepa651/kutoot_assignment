@@ -6,8 +6,9 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import 'bloc/internet_connection_cubit/internet_connection_cubit.dart';
 
+import 'bloc/location_bloc/location_bloc.dart';
 import 'hive/hive_registrar.g.dart';
-import 'model/task.dart' show Task, TaskList;
+import 'model/task.dart' show Task;
 import 'repo/task_repo.dart' show TaskRepository;
 import 'routes/app_router.dart' show AppRouter;
 
@@ -21,7 +22,15 @@ Future<void> initHive() async {
   await Hive.initFlutter();
   Hive.registerAdapters();
   GetIt.I.registerLazySingletonAsync<Box<Task>>(
+    instanceName: 'tasksBox',
     () async => Hive.openBox<Task>('tasksBox'),
+    dispose: (box) {
+      box.close();
+    },
+  );
+  GetIt.I.registerLazySingletonAsync<Box<Task>>(
+    instanceName: 'unSyncedTasksBox',
+    () async => Hive.openBox<Task>('unSyncedTasksBox'),
     dispose: (box) {
       box.close();
     },
@@ -33,19 +42,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => InternetConnectionCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => InternetConnectionCubit()),
+        BlocProvider(
+          create: (context) => LocationBloc()..add(FetchLocationRequested()),
+        ),
+      ],
       child: MultiRepositoryProvider(
         providers: [
           RepositoryProvider(create: (context) => ProductRepository()),
           RepositoryProvider(create: (context) => TaskRepository()),
         ],
         child: MaterialApp.router(
-          title: 'Flutter Developer Assignment Task',
+          title: 'KUTOOT',
           routerConfig: AppRouter.router,
-          theme: ThemeData(
-            colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-          ),
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.indigo)),
         ),
       ),
     );

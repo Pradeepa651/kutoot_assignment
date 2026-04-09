@@ -9,7 +9,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../model/task.dart' show Task, TaskList;
+import '../../model/task.dart' show Task;
 import '../../repo/task_repo.dart';
 
 part 'task_event.dart';
@@ -73,7 +73,12 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   void _onTaskLoaded(TaskLoaded event, Emitter<TaskState> emit) async {
     try {
-      final taskLocalDB = await GetIt.I.getAsync<Box<Task>>();
+      final taskLocalDB = await GetIt.I.getAsync<Box<Task>>(
+        instanceName: 'tasksBox',
+      );
+      final unSyncedTaskLocalDB = await GetIt.I.getAsync<Box<Task>>(
+        instanceName: 'unSyncedTasksBox',
+      );
       if (state.internetStatus == InternetStatus.online) {
         final fetchedTasks = await taskRepo.fetchTasks();
         await taskLocalDB.clear();
@@ -81,6 +86,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         _updateState(
           emit,
           tasks: List.from(fetchedTasks),
+
           status: Status.success,
         );
       } else {
@@ -88,6 +94,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         _updateState(
           emit,
           tasks: List.from(loadedTasks),
+          unSyncedTasks: List.from(unSyncedTaskLocalDB.values),
           status: Status.success,
         );
       }
@@ -114,17 +121,24 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           syncStatus: SyncStatus.error,
           showSyncError: true,
         );
+        final unSyncedTaskLocalDB = await GetIt.I.getAsync<Box<Task>>(
+          instanceName: 'unSyncedTasksBox',
+        );
+        await unSyncedTaskLocalDB.add(newTask);
       } else {
         await taskRepo.addTasks(newTask);
         _updateState(emit, tasks: updatedTasks, syncStatus: SyncStatus.success);
       }
     } finally {
-      final taskLocalDB = await GetIt.I.getAsync<Box<Task>>();
+      final taskLocalDB = await GetIt.I.getAsync<Box<Task>>(
+        instanceName: 'tasksBox',
+      );
+
       await taskLocalDB.add(newTask);
     }
   }
 
-  void _onTaskEdited(TaskEdited event, Emitter<TaskState> emit) {
+  void _onTaskEdited(TaskEdited event, Emitter<TaskState> emit) async {
     final updatedTasks = state.tasks.map((task) {
       if (task.id == event.id) {
         return Task(
@@ -146,14 +160,22 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           syncStatus: SyncStatus.error,
           showSyncError: true,
         );
+        final unSyncedTaskLocalDB = await GetIt.I.getAsync<Box<Task>>(
+          instanceName: 'unSyncedTasksBox',
+        );
+        await unSyncedTaskLocalDB.add(
+          updatedTasks.firstWhere((task) => task.id == event.id),
+        );
       } else {
-        taskRepo.updateTasks(
+        await taskRepo.updateTasks(
           updatedTasks.firstWhere((task) => task.id == event.id),
         );
         _updateState(emit, syncStatus: SyncStatus.success);
       }
     } finally {
-      GetIt.I.getAsync<Box<Task>>().then((taskLocalDB) async {
+      await GetIt.I.getAsync<Box<Task>>(instanceName: 'tasksBox').then((
+        taskLocalDB,
+      ) async {
         final index = taskLocalDB.values.toList().indexWhere(
           (task) => task.id == event.id,
         );
@@ -174,6 +196,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       await taskRepo.syncTasks(state.unSyncedTasks);
       _updateState(emit, syncStatus: SyncStatus.success, unSyncedTasks: []);
+      await GetIt.I.getAsync<Box<Task>>(instanceName: 'unSyncedTasksBox').then((
+        unSyncedTaskLocalDB,
+      ) async {
+        await unSyncedTaskLocalDB.clear();
+      });
     } catch (e) {
       _updateState(
         emit,

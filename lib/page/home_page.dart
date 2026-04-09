@@ -31,6 +31,16 @@ class HomePage extends StatelessWidget {
               },
             ),
           ),
+          Card(
+            child: ListTile(
+              title: const Text('Task 3'),
+              subtitle: const Text('UI & Location'),
+              leading: const Icon(Icons.list),
+              onTap: () {
+                context.push(AppRoutes.dashboard);
+              },
+            ),
+          ),
         ],
       ),
     );
