@@ -97,38 +97,17 @@ class ProductListView extends StatelessWidget {
                   return SliverToBoxAdapter();
                 },
               ),
-              BlocBuilder<ProductBloc, ProductState>(
-                builder: (context, state) {
-                  if (state.apiStatus == ApiStatus.loading &&
-                      state.products.isEmpty) {
-                    return const SliverFillRemaining(
-                      child: Center(
-                        child: RepaintBoundary(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    );
-                  } else if (state.apiStatus == ApiStatus.error &&
-                      state.products.isEmpty) {
-                    return SliverFillRemaining(
-                      child: RepaintBoundary(
-                        child: Center(
-                          child: Text('Error: ${state.errorMessage}'),
-                        ),
-                      ),
-                    );
-                  } else if (state.products.isEmpty) {
-                    return const SliverFillRemaining(
-                      child: Center(child: Text('No products available')),
-                    );
-                  } else {
-                    return SliverList.builder(
-                      itemBuilder: (context, index) {
-                        return ProductView(product: state.products[index]);
-                      },
-                      itemCount: state.products.length,
-                    );
-                  }
+              BlocSelector<ProductBloc, ProductState, List<Product>>(
+                selector: (state) {
+                  return state.products;
+                },
+                builder: (context, products) {
+                  return SliverList.builder(
+                    itemBuilder: (context, index) {
+                      return ProductView(product: products[index]);
+                    },
+                    itemCount: products.length,
+                  );
                 },
               ),
 
@@ -137,24 +116,29 @@ class ProductListView extends StatelessWidget {
                   if (state.apiStatus == ApiStatus.loading &&
                       state.products.isNotEmpty) {
                     return const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: RepaintBoundary(
-                            child: CircularProgressIndicator(),
+                      child: SizedBox(
+                        height: 200,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: RepaintBoundary(
+                              child: CircularProgressIndicator(),
+                            ),
                           ),
                         ),
                       ),
                     );
                   } else if (state.hasMaxReached) {
                     return const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: Text('No more products')),
+                      child: SizedBox(
+                        height: 200,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: Text('No more products')),
+                        ),
                       ),
                     );
-                  } else if (state.apiStatus != ApiStatus.error &&
-                      state.products.isNotEmpty) {
+                  } else if (state.apiStatus != ApiStatus.error) {
                     return SliverToBoxAdapter(
                       child: Column(
                         children: [

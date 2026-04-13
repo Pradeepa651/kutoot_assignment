@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_developer_assignment_task/utils/widgets/rounded_container.dart';
-import 'package:go_router/go_router.dart';
 
 import '../bloc/internet_connection_cubit/internet_connection_cubit.dart';
 import '../bloc/location_bloc/location_bloc.dart';
 import '../bloc/product_bloc/product_bloc.dart';
 import '../model/products.dart' show Product;
-import '../routes/app_routes.dart';
 import '../utils/comonents/location_view.dart';
 import '../utils/comonents/search.dart' show SearchComponents;
 
